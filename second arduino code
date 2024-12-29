@@ -1,0 +1,75 @@
+#include <Servo.h>
+#include <SoftwareSerial.h>   
+
+SoftwareSerial BTSerial(11, 13); // RX | TX
+
+int servoPin = 9; 
+Servo Servo1;
+
+int lights = A4;
+int readval = A1;
+unsigned int val;
+
+int trigPin = 2;
+int echoPin = 12;
+long duration, distance;
+
+int buzzer = 10;
+
+int i = 0;
+
+void setup()
+{
+    Serial.begin(9600);
+    pinMode(lights, OUTPUT);
+    pinMode(readval, INPUT);
+    
+    pinMode(trigPin, OUTPUT);
+    pinMode(echoPin, INPUT);
+
+    pinMode(buzzer, OUTPUT);
+
+    Servo1.attach(servoPin);
+
+    Serial.begin(9600);        // For Arduino Serial Monitor
+    BTSerial.begin(9600);      // For HC-05
+    Serial.println("Arduino and HC-05 Initialized!");
+}
+
+void loop(){
+  val = analogRead(readval);
+  delay(100);
+  if (val >= 600) {
+    BTSerial.println("Environment is dark. Lights are turn on. ");
+    Serial.println("Environment is dark. Lights are turn on.");
+    digitalWrite(lights, HIGH); // Turn the light on
+    }else{
+     digitalWrite(lights, LOW);  // Turn the light off
+    }
+  
+  // put your main code here, to run repeatedly:
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);   
+  digitalWrite(trigPin, HIGH);     // send waves for 10 us
+  delayMicroseconds(10);
+  duration = pulseIn(echoPin, HIGH); // receive reflected waves
+  distance = duration / 58.2;   // convert to distance
+  delay(10);
+
+  if (distance > 3 && distance <12){
+    BTSerial.println("Your car has crashed. Cushion has been deployed! ");
+    Serial.println("Your car has crashed.  Cushion has been deployed! ");
+    Servo1.write(0);
+    digitalWrite(buzzer,HIGH);
+    delay(10000);
+    Servo1.write(370);
+    digitalWrite(buzzer,LOW);
+    delay(1000);
+  }else{
+    BTSerial.println("There is no obstacle ahead. The car is safe to go. ");
+    Serial.println("There is no obstacle ahead. The car is safe to go. ");
+  }
+
+  
+  
+}
